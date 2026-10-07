@@ -24,7 +24,7 @@ HERE = Path(__file__).parent
 WEB_URL = sys.argv[1] if len(sys.argv) > 1 else None
 KID_PACE_M_PER_MIN = 55   # about 2 mph with kids
 PATH_FACTOR = 1.35        # straight line -> walking path
-MIN_PER_STOP = 7
+MIN_PER_STOP = 2
 
 
 def meters(a, b):
