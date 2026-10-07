@@ -1,0 +1,233 @@
+<title>West Point Scavenger Hunt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Graduate&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one narrow phone column; a route chooser and adult briefing, then a step-by-step clue card per stop. */
+:root {
+  --bg: #eceeea;          /* granite */
+  --surface: #f8f9f6;
+  --ink: #17191b;
+  --muted: #565d63;       /* cadet gray */
+  --line: #c9cdc6;
+  --gold: #8a6714;        /* Army gold, text-safe */
+  --gold-fill: #d3a93a;
+  --on-gold: #17191b;
+  --qr-bg: #ffffff;
+  --qr-ink: #000000;
+  --display: "Graduate", "Rockwell", "Courier New", serif;
+  --body: "Atkinson Hyperlegible", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131416; --surface: #1d1f22; --ink: #eef0ec; --muted: #a5adb3; --line: #34383d;
+    --gold: #e2bd5a; --gold-fill: #d3a93a; --on-gold: #131416; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131416; --surface: #1d1f22; --ink: #eef0ec; --muted: #a5adb3; --line: #34383d;
+  --gold: #e2bd5a; --gold-fill: #d3a93a; --on-gold: #131416; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 1.0625rem; line-height: 1.5; }
+.wrap { max-width: 34rem; margin: 0 auto; padding-inline: 16px; padding-block: 20px 48px; display: flex; flex-direction: column; gap: 22px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; letter-spacing: .02em; }
+h1 { font-size: 2.1rem; line-height: 1.05; }
+h2 { font-size: 1.45rem; line-height: 1.15; }
+h3 { font-size: 1.1rem; }
+p { margin: 0; }
+.eyebrow { font-size: .78rem; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); font-weight: 700; }
+.stripe { height: 6px; background: repeating-linear-gradient(90deg, var(--gold-fill) 0 34px, var(--ink) 34px 40px); border-radius: 3px; }
+header { display: flex; flex-direction: column; gap: 10px; }
+header p { color: var(--muted); }
+
+.routes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 420px) { .routes { grid-template-columns: 1fr; } }
+.route-btn { text-align: left; font: inherit; color: inherit; background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.route-btn[aria-pressed="true"] { border-color: var(--gold-fill); box-shadow: inset 0 0 0 1px var(--gold-fill); }
+.route-btn .stat { font-variant-numeric: tabular-nums; color: var(--gold); font-weight: 700; font-size: .95rem; }
+.route-btn small { color: var(--muted); font-size: .9rem; line-height: 1.35; }
+.route-btn:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--gold-fill); outline-offset: 2px; }
+
+.brief { display: flex; flex-direction: column; gap: 14px; }
+.legs { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.legs li { display: grid; grid-template-columns: 2rem 1fr auto; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+.legs .n { font-family: var(--display); color: var(--gold); }
+.legs .t { color: var(--muted); font-size: .88rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.legs .name { min-width: 0; }
+.totals { display: flex; flex-wrap: wrap; gap: 8px 18px; font-variant-numeric: tabular-nums; font-size: .95rem; }
+.totals b { font-family: var(--display); font-weight: 400; color: var(--gold); font-size: 1.15rem; }
+.notes { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: .95rem; }
+.terrain { font-size: .95rem; }
+.downloads { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .95rem; }
+
+.btn { font: inherit; font-weight: 700; border: 0; border-radius: 999px; padding: 13px 22px; cursor: pointer; background: var(--gold-fill); color: var(--on-gold); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn.ghost { background: transparent; color: var(--ink); border: 2px solid var(--line); }
+.btn.small { padding: 8px 14px; font-size: .9rem; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-row .btn { flex: 1 1 10rem; }
+
+/* Hunt view */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.progress { display: flex; gap: 4px; flex-wrap: wrap; }
+.progress span { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); }
+.progress span.done { background: var(--gold-fill); border-color: var(--gold-fill); }
+.progress span.now { border-color: var(--gold-fill); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 18px; display: flex; flex-direction: column; gap: 16px; }
+.clue { font-family: var(--body); font-style: italic; font-size: 1.15rem; line-height: 1.55; border-left: 4px solid var(--gold-fill); padding-left: 14px; }
+.clue span { display: block; }
+.mapbox { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.qr { background: var(--qr-bg); padding: 10px; border-radius: 8px; width: 180px; max-width: 100%; aspect-ratio: 1; display: block; }
+.qr svg { width: 100%; height: 100%; display: block; }
+.maplinks { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.hint { font-size: .92rem; color: var(--muted); }
+.hint b { color: var(--ink); }
+.found { display: flex; flex-direction: column; gap: 16px; }
+.found h2 { color: var(--gold); }
+.block { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: .75rem; text-transform: uppercase; letter-spacing: .14em; font-weight: 700; color: var(--muted); }
+.answer { background: var(--bg); border-radius: 8px; padding: 10px 12px; }
+.facts { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 8px; }
+.tip { font-size: .92rem; border: 1px dashed var(--line); border-radius: 8px; padding: 10px 12px; color: var(--muted); }
+.done-card { text-align: center; align-items: center; }
+footer { font-size: .8rem; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .found:not([hidden]) { animation: rise .35s ease-out; } }
+@keyframes rise { from { transform: translateY(6px); opacity: .4; } to { transform: none; opacity: 1; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="stripe" aria-hidden="true"></div>
+    <span class="eyebrow" id="edition"></span>
+    <h1>West Point Scavenger Hunt</h1>
+    <p>Follow rhyming clues from Eisenhower Hall to Trophy Point. At each stop: a kid activity, a challenge question, and fun facts. For ages 5 to 14 and their grown-ups.</p>
+  </header>
+
+  <section id="home" class="brief" aria-label="Choose a route">
+    <div class="routes" id="routes"></div>
+    <div class="card brief">
+      <div class="block">
+        <span class="label">For grown-ups: route preview</span>
+        <h2 id="brief-name"></h2>
+      </div>
+      <div class="totals" id="totals"></div>
+      <p class="terrain" id="terrain"></p>
+      <ol class="legs" id="legs"></ol>
+      <ul class="notes" id="notes"></ul>
+      <div class="block">
+        <span class="label">Printable version with clickable map links</span>
+        <div class="downloads">__PDF_LINKS__</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="start" type="button">Start the hunt</button>
+        <button class="btn ghost" id="resume" type="button" hidden>Resume</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="hunt" hidden aria-live="polite">
+    <div class="card" id="stage"></div>
+  </section>
+
+  <footer>Directions open in Google Maps or Apple Maps. Pins are approximate, so use your eyes too. West Point is an active Army post; follow posted signs and visitor rules.</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const DATA = __DATA__;
+const $ = s => document.querySelector(s);
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+let route = (location.hash.slice(1) in DATA.routes) ? location.hash.slice(1) : (store.get("wp-route") || "short");
+let step = 0, revealed = false;
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function qrSvg(text) {
+  if (typeof qrcode !== "function") return "";
+  const q = qrcode(0, "M"); q.addData(text); q.make();
+  const n = q.getModuleCount(); let d = "";
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c} ${r}h1v1h-1z`;
+  return `<svg viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges" role="img" aria-label="QR code for Google Maps walking directions"><rect width="${n}" height="${n}" fill="var(--qr-bg)"/><path d="${d}" fill="var(--qr-ink)"/></svg>`;
+}
+const fmtMi = m => (m / 1609.34).toFixed(1);
+
+function renderHome() {
+  $("#edition").textContent = DATA.edition;
+  $("#routes").innerHTML = Object.entries(DATA.routes).map(([k, r]) => `
+    <button class="route-btn" type="button" id="route-${k}" aria-pressed="${k === route}" data-route="${k}">
+      <h3>${esc(r.name)}</h3>
+      <span class="stat">${r.legs.length} stops · ${fmtMi(r.meters)} mi · ~${Math.round(r.minutes / 5) * 5} min</span>
+      <small>${esc(r.tagline)}</small>
+    </button>`).join("");
+  document.querySelectorAll(".route-btn").forEach(b => b.onclick = () => { route = b.dataset.route; store.set("wp-route", route); renderHome(); });
+  const r = DATA.routes[route];
+  $("#brief-name").textContent = r.name;
+  $("#totals").innerHTML = `<span><b>${r.legs.length}</b> stops</span><span><b>${fmtMi(r.meters)}</b> miles walking</span><span><b>${Math.round(r.minutes / 5) * 5}</b> min with stops</span>`;
+  $("#terrain").textContent = r.terrain;
+  $("#legs").innerHTML = `<li><span class="n">S</span><span class="name">Start: ${esc(DATA.start.name)}</span><span class="t">park here</span></li>` +
+    r.legs.map((l, i) => `<li><span class="n">${i + 1}</span><span class="name">${esc(l.name)}</span><span class="t">${l.walkMin} min walk</span></li>`).join("");
+  $("#notes").innerHTML = DATA.notes.map(n => `<li>${esc(n)}</li>`).join("");
+  const saved = store.get("wp-progress");
+  $("#resume").hidden = !(saved && saved.route === route && saved.step > 0);
+  if (saved && saved.route === route) $("#resume").textContent = `Resume at stop ${Math.min(saved.step, r.legs.length)}`;
+}
+
+function go(s, rev) {
+  step = s; revealed = !!rev;
+  store.set("wp-progress", { route, step, revealed });
+  $("#home").hidden = true; $("#hunt").hidden = false;
+  renderStage(); window.scrollTo({ top: 0 });
+}
+function home() { $("#home").hidden = false; $("#hunt").hidden = true; renderHome(); window.scrollTo({ top: 0 }); }
+
+function renderStage() {
+  const r = DATA.routes[route], legs = r.legs, total = legs.length;
+  const dots = `<div class="progress" aria-label="Stop ${Math.min(step, total)} of ${total}">${legs.map((_, i) =>
+    `<span class="${i + 1 < step || (i + 1 === step && revealed) ? "done" : (i + 1 === step ? "now" : "")}"></span>`).join("")}</div>`;
+  const top = `<div class="topbar"><button class="btn ghost small" type="button" id="back">← ${step === 0 ? "Routes" : "Back"}</button>${dots}</div>`;
+  let html = "";
+  if (step === 0) {
+    const s = DATA.start;
+    html = `${top}<span class="eyebrow">${esc(r.name)} · Starting point</span><h2>${esc(s.name)}</h2><p>${esc(s.intro)}</p>
+      ${mapBox(s)}<button class="btn" type="button" id="next">We're at Eisenhower Hall. Show clue 1!</button>`;
+  } else if (step > total) {
+    html = `${top}<div class="done-card found"><span class="eyebrow">Mission complete</span><h2>You did it, cadets!</h2>
+      <p>You finished the ${esc(r.name)}: ${total} stops and about ${fmtMi(r.meters)} miles. Every cadet earns an honorary Black Knight salute. Hooah!</p>
+      <button class="btn ghost" type="button" id="restart">Back to routes</button></div>`;
+  } else {
+    const l = legs[step - 1];
+    html = `${top}<span class="eyebrow">Clue ${step} of ${total}</span>
+      <div class="clue">${l.clue.map(x => `<span>${esc(x)}</span>`).join("")}</div>
+      ${mapBox(l)}
+      <p class="hint"><b>Grown-ups:</b> ${esc(l.walk)} About ${l.walkMin} min.</p>`;
+    if (!revealed) html += `<button class="btn" type="button" id="found">We found it!</button>`;
+    else html += `<div class="found">
+      <div class="block"><span class="label">Stop ${step}: you found</span><h2>${esc(l.name)}</h2></div>
+      <div class="block"><span class="label">Activity</span><p>${esc(l.activity)}</p></div>
+      <div class="block"><span class="label">Challenge question</span><p><b>${esc(l.question)}</b></p>
+        <button class="btn ghost small" type="button" id="ans-btn" aria-expanded="false">Show answer</button>
+        <p class="answer" id="ans" hidden>${esc(l.answer)}</p></div>
+      <div class="block"><span class="label">Fun facts</span><ul class="facts">${l.facts.map(f => `<li>${esc(f)}</li>`).join("")}</ul></div>
+      ${l.grownup_tip ? `<p class="tip"><b>Grown-up tip:</b> ${esc(l.grownup_tip)}</p>` : ""}
+      <button class="btn" type="button" id="next">${step === total ? "Finish the hunt" : `Next clue (${step + 1} of ${total}) →`}</button></div>`;
+  }
+  $("#stage").innerHTML = html;
+  const on = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
+  on("back", () => { if (step > total) go(total, true); else if (revealed) go(step, false); else if (step <= 0) home(); else if (step === 1) go(0); else go(step - 1, true); });
+  on("next", () => go(step + 1, false));
+  on("found", () => go(step, true));
+  on("restart", () => { store.set("wp-progress", null); home(); });
+  on("ans-btn", e => { const a = $("#ans"); a.hidden = !a.hidden; e.target.textContent = a.hidden ? "Show answer" : "Hide answer"; e.target.setAttribute("aria-expanded", String(!a.hidden)); });
+}
+function mapBox(p) {
+  return `<div class="mapbox"><a class="qr" href="${p.gmaps}" target="_blank" rel="noopener">${qrSvg(p.gmaps)}</a>
+    <div class="maplinks"><a class="btn small" href="${p.gmaps}" target="_blank" rel="noopener">Google Maps</a>
+    <a class="btn small ghost" href="${p.amaps}" target="_blank" rel="noopener">Apple Maps</a></div></div>`;
+}
+
+$("#start").onclick = () => go(0);
+$("#resume").onclick = () => { const s = store.get("wp-progress"); go(s.step, s.revealed); };
+renderHome();
+</script>
