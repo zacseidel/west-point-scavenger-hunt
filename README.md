@@ -1,6 +1,6 @@
 # West Point Scavenger Hunt
 
-A kid-friendly (ages 5–14) walking scavenger hunt around West Point, from Eisenhower Hall to Trophy Point.
+A kid-friendly walking scavenger hunt around West Point, from Eisenhower Hall to Trophy Point.
 
 **Play it:** https://zacseidel.github.io/west-point-scavenger-hunt/
 
