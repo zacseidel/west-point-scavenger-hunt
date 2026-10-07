@@ -96,6 +96,11 @@ header p { color: var(--muted); }
 .facts { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 8px; }
 .tip { font-size: .92rem; border: 1px dashed var(--line); border-radius: 8px; padding: 10px 12px; color: var(--muted); }
 .done-card { text-align: center; align-items: center; }
+.gate form { display: flex; flex-direction: column; gap: 10px; }
+.gate label { font-weight: 700; font-size: 1.1rem; }
+.gate input { font: inherit; font-size: 1.3rem; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; font-variant-numeric: tabular-nums; }
+.gate input:focus-visible { outline: 3px solid var(--gold-fill); outline-offset: 1px; border-color: var(--gold-fill); }
+.gate .msg { min-height: 1.5em; font-weight: 700; color: var(--gold); }
 footer { font-size: .8rem; color: var(--muted); }
 @media (prefers-reduced-motion: no-preference) { .found:not([hidden]) { animation: rise .35s ease-out; } }
 @keyframes rise { from { transform: translateY(6px); opacity: .4; } to { transform: none; opacity: 1; } }
@@ -109,7 +114,22 @@ footer { font-size: .8rem; color: var(--muted); }
     <p>Follow rhyming clues from Eisenhower Hall to Trophy Point. At each stop: a kid activity, a challenge question, and fun facts. For ages 5 to 14 and their grown-ups.</p>
   </header>
 
-  <section id="home" class="brief" aria-label="Choose a route">
+  <section id="gate" class="card brief gate" aria-label="Cadet check">
+    <div class="block">
+      <span class="label">Cadet check</span>
+      <h2>Password, please!</h2>
+    </div>
+    <p>Answer this West Point question to unlock the hunt. Not sure? Ask the grown-up who sent you the link.</p>
+    <form id="gate-form" autocomplete="off">
+      <label for="gate-input" id="gate-q"></label>
+      <input id="gate-input" inputmode="numeric" placeholder="Your answer">
+      <button class="btn" type="submit">Unlock the hunt</button>
+    </form>
+    <p class="msg" id="gate-msg" aria-live="polite"></p>
+    <button class="btn ghost small" type="button" id="gate-other">Try a different question</button>
+  </section>
+
+  <section id="home" class="brief" aria-label="Choose a route" hidden>
     <div class="routes" id="routes"></div>
     <div class="card brief">
       <div class="block">
@@ -237,7 +257,25 @@ function mapBox(p) {
     <a class="btn small ghost" href="${p.amaps}" target="_blank" rel="noopener">Apple Maps</a></div></div>`;
 }
 
+let gateIdx = Math.floor(Math.random() * DATA.gate.length);
+function showGateQ() { $("#gate-q").textContent = DATA.gate[gateIdx].q; $("#gate-input").value = ""; $("#gate-msg").textContent = ""; }
+async function sha256(t) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+function unlock() { store.set("wp-unlocked", true); $("#gate").hidden = true; $("#home").hidden = false; renderHome(); }
+$("#gate-form").onsubmit = async e => {
+  e.preventDefault();
+  const guess = $("#gate-input").value.replace(/[^0-9]/g, "");
+  if (!guess) { $("#gate-msg").textContent = "Type a number first."; return; }
+  let ok = false;
+  try { ok = (await sha256(guess)) === DATA.gate[gateIdx].h; } catch (err) { ok = true; }
+  if (ok) unlock(); else $("#gate-msg").textContent = "Not quite. Try again, or try a different question.";
+};
+$("#gate-other").onclick = () => { gateIdx = (gateIdx + 1) % DATA.gate.length; showGateQ(); };
+showGateQ();
+if (store.get("wp-unlocked") === true) unlock();
+
 $("#start").onclick = () => go(0);
 $("#resume").onclick = () => { const s = store.get("wp-progress"); go(s.step, s.revealed); };
-renderHome();
 </script>

@@ -71,7 +71,8 @@ START = dict(D.START, gmaps=D.gmaps(D.START["lat"], D.START["lng"]),
 
 # ---------- Web page ----------
 def build_html():
-    data = {"edition": D.EDITION, "start": START, "routes": ROUTES, "notes": D.ADULT_NOTES}
+    gate = [{"q": g["q"], "h": g["h"]} for g in D.GATE]
+    data = {"edition": D.EDITION, "start": START, "routes": ROUTES, "notes": D.ADULT_NOTES, "gate": gate}
     links = " ".join(f'<a href="west-point-hunt-{k}.pdf" target="_blank" rel="noopener">{r["name"]} (PDF)</a>'
                      for k, r in ROUTES.items())
     html = (HERE / "template.html").read_text()

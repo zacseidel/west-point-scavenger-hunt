@@ -343,12 +343,18 @@ ROUTES = {
 }
 
 ADULT_NOTES = [
-    "West Point is an active Army post. Check the current visitor access rules on westpoint.edu before you go, and bring photo ID for every adult.",
-    "Park at Eisenhower Hall. Both routes end at Trophy Point, a short walk back to the car.",
+    "West Point is an active Army post. Check the current visitor access rules on westpoint.edu before you go, and bring photo ID for every adult. Please keep voices down near barracks and academic buildings when classes are in session. Park at Eisenhower Hall. Both routes end at Trophy Point, a short walk back to the car.",
     "Bring a phone with a compass app, water, and something to write with.",
-    "There's a water fountain at Trophy Point below Battle Monument.",
-    "Optional prize: before you start, hide a small treat in a cannon at Battle Monument.",
-    "Please keep voices down near barracks and academic buildings when classes are in session.",
+]
+
+# Password check shown before the hunt opens. One question is picked at random.
+# Only SHA-256 hashes of the answers are stored (this repo is public). To set a new answer:
+#   python3 -c "import hashlib; print(hashlib.sha256(b'1234').hexdigest())"
+# Answers are digits only; the page strips commas and spaces before checking.
+GATE = [
+    {"q": "How many names are on Battle Monument?", "h": "903a4207be29cb52c7c28b6b3e83b7bea776a390167924fe8ff18aa325f10285"},
+    {"q": "How many million gallons of water are in Lusk Reservoir when water is flowing over the spillway?", "h": "349c41201b62db851192665c504b350ff98c6b45fb62a8a2161f78b6534d8de9"},
+    {"q": "How many lights are in Cullum Hall?", "h": "9644294ac4ffb3091eef01219b3fe4fe467f05890cc56af961dce68fddbb7704"},
 ]
 
 
