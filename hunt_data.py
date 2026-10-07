@@ -216,16 +216,19 @@ STOPS = {
         ],
     },
     "battle": {
-        "name": "Battle Monument",
+        "name": "Battle Monument & the Hidden Prize",
         "lat": 41.3947, "lng": -73.95683,
         "clue": [
             "A super-tall column as smooth as can be,",
             "with a winged lady on top for all to see.",
-            "Big round stone balls stand guard all around.",
-            "Find the tallest monument on Trophy Point's ground!",
+            "Big stone balls and old cannons stand guard on the ground.",
+            "Peek inside the cannons. Is there treasure to be found?",
         ],
-        "walk": {"sedgwick": "Cross Washington Road carefully, holding hands, to the tall column."},
-        "activity": "Take a picture with the big granite balls. Can your family link arms all the way around one? Look up: who can see the statue on the very top?",
+        "walk": {
+            "sedgwick": "Cross Washington Road carefully, holding hands, to the tall column.",
+            "chain": "Walk back west across Trophy Point to the tall column.",
+        },
+        "activity": "Peek inside the cannons around the monument. Did somebody leave a prize? Then take a picture with the big granite balls. Can your family link arms all the way around one? Look up: who can see the statue on the very top?",
         "question": "The statue on top is named after a word that means being very well known. What's her name?",
         "answer": "Fame! She was sculpted by Frederick MacMonnies.",
         "facts": [
@@ -277,7 +280,7 @@ STOPS = {
         ],
     },
     "finale": {
-        "name": "Trophy Point & the Million-Dollar View",
+        "name": "The Million-Dollar View",
         "lat": 41.3952, "lng": -73.9571,  # CHECK: view spot above the amphitheater
         "clue": [
             "You made it to the end, and the view is the prize!",
@@ -287,7 +290,7 @@ STOPS = {
         ],
         "walk": {
             "overlook": "Walk back toward Battle Monument and look north over the grassy hill and the amphitheater.",
-            "chain": "Walk back toward Battle Monument and look north over the grassy hill and the amphitheater.",
+            "battle": "From Battle Monument, walk to the top of the grassy hill and look north up the river.",
         },
         "activity": "BONUS ROUND! (1) Take a drink from the water fountain below Battle Monument. (2) Roll or run down the hill, but be careful, it's steeper than it looks! (3) Take a family photo with the million-dollar view. Last of all, everyone shares their favorite stop.",
         "question": "Looking up the river, what is the big mountain on the left?",
@@ -303,8 +306,8 @@ STOPS = {
 ROUTES = {
     "short": {
         "name": "Short Route",
-        "tagline": "Tunnel, statues, the Great Chain, and the big view.",
-        "stops": ["cannons", "tunnel", "thayer", "macarthur", "sedgwick", "battle", "chain", "finale"],
+        "tagline": "Tunnel, statues, the Great Chain, a hidden prize, and the big view.",
+        "stops": ["cannons", "tunnel", "thayer", "macarthur", "sedgwick", "chain", "battle", "finale"],
         "terrain": "Mostly flat sidewalks and paths. The tunnel has a short set of stairs.",
     },
     "long": {

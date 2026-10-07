@@ -82,6 +82,12 @@ header p { color: var(--muted); }
 .maplinks { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 .hint { font-size: .92rem; color: var(--muted); }
 .hint b { color: var(--ink); }
+.gu-toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: .92rem; color: var(--muted); cursor: pointer; border-top: 1px solid var(--line); padding-top: 12px; }
+.gu-toggle input { appearance: none; -webkit-appearance: none; flex: none; width: 44px; height: 26px; border-radius: 13px; background: var(--line); position: relative; cursor: pointer; margin: 0; transition: background .15s; }
+.gu-toggle input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface); transition: transform .15s; }
+.gu-toggle input:checked { background: var(--gold-fill); }
+.gu-toggle input:checked::after { transform: translateX(18px); }
+.gu-toggle input:focus-visible { outline: 3px solid var(--gold-fill); outline-offset: 2px; }
 .found { display: flex; flex-direction: column; gap: 16px; }
 .found h2 { color: var(--gold); }
 .block { display: flex; flex-direction: column; gap: 6px; }
@@ -142,6 +148,7 @@ const store = {
 };
 let route = (location.hash.slice(1) in DATA.routes) ? location.hash.slice(1) : (store.get("wp-route") || "short");
 let step = 0, revealed = false;
+let showGU = store.get("wp-grownup") === true;
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function qrSvg(text) {
@@ -201,7 +208,8 @@ function renderStage() {
     html = `${top}<span class="eyebrow">Clue ${step} of ${total}</span>
       <div class="clue">${l.clue.map(x => `<span>${esc(x)}</span>`).join("")}</div>
       ${mapBox(l)}
-      <p class="hint"><b>Grown-ups:</b> ${esc(l.walk)} About ${l.walkMin} min.</p>`;
+      <label class="gu-toggle" for="gu">Show grown-up directions<input type="checkbox" id="gu" role="switch" ${showGU ? "checked" : ""}></label>
+      <p class="hint" id="gu-hint" ${showGU ? "" : "hidden"}><b>Grown-ups:</b> ${esc(l.walk)} About ${l.walkMin} min.</p>`;
     if (!revealed) html += `<button class="btn" type="button" id="found">We found it!</button>`;
     else html += `<div class="found">
       <div class="block"><span class="label">Stop ${step}: you found</span><h2>${esc(l.name)}</h2></div>
@@ -218,6 +226,8 @@ function renderStage() {
   on("back", () => { if (step > total) go(total, true); else if (revealed) go(step, false); else if (step <= 0) home(); else if (step === 1) go(0); else go(step - 1, true); });
   on("next", () => go(step + 1, false));
   on("found", () => go(step, true));
+  const gu = document.getElementById("gu");
+  if (gu) gu.onchange = () => { showGU = gu.checked; store.set("wp-grownup", showGU); $("#gu-hint").hidden = !showGU; };
   on("restart", () => { store.set("wp-progress", null); home(); });
   on("ans-btn", e => { const a = $("#ans"); a.hidden = !a.hidden; e.target.textContent = a.hidden ? "Show answer" : "Hide answer"; e.target.setAttribute("aria-expanded", String(!a.hidden)); });
 }
